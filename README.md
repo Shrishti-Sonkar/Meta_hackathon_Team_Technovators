@@ -1,3 +1,11 @@
+---
+title: Meta Hackathon Team Technovators
+emoji: 🚀
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+pinned: false
+---
 # TrustDeskEnv 🛡️
 
 > **OpenEnv-compatible enterprise AI benchmark for customer support and trust & safety operations**
