@@ -1,0 +1,77 @@
+{
+  "task_id": "hard_security_001",
+  "title": "Security Breach + Billing + Cancellation Conflict",
+  "difficulty": "hard",
+  "description": "An enterprise customer cannot access their account, reports a suspicious login from an unknown location last night, sees an unexpected charge posted today, and demands immediate account cancellation and a full refund. The agent must prioritize security over billing and cancellation, route to trust & safety, request verification before taking any irreversible action, draft a safe response that does not promise immediate cancellation or refund, and escalate appropriately.",
+  "customer_message": "I cannot log in to my account. I received an email last night saying someone from Russia logged into my account. There is also an unauthorized charge of $499 on my card from today. I want my account cancelled immediately and all charges refunded right now. This is a security emergency!",
+  "customer_tier": "enterprise",
+  "account_status": "locked",
+  "policy_context": {
+    "security_incidents_take_priority": true,
+    "verification_required_before_refund_on_suspicious_account": true,
+    "verification_required_before_cancellation_on_locked_account": true,
+    "cancellation_allowed_after_investigation": true,
+    "refund_eligible_if_unauthorized_charge_confirmed": true,
+    "unauthorized_charge_review_sla_hours": 24,
+    "account_locked_reason": "suspicious_login_detected",
+    "suspicious_login_country": "RU",
+    "suspicious_login_time": "2024-11-14T23:47:00Z",
+    "charge_amount_usd": 499,
+    "enterprise_sla_minutes": 60,
+    "policy_note": "Do not promise cancellation or refund before identity verification and security review. Security team must review before billing team acts."
+  },
+  "security_flags": [
+    "suspicious_login_detected",
+    "unknown_country_login",
+    "account_locked_by_system",
+    "potential_unauthorized_charge"
+  ],
+  "prior_history": [
+    {
+      "ticket_id": "prev_003",
+      "date": "2024-08-01",
+      "category": "technical",
+      "resolution": "resolved",
+      "notes": "Login issue resolved — user forgot 2FA device."
+    },
+    {
+      "ticket_id": "prev_004",
+      "date": "2024-10-12",
+      "category": "billing",
+      "resolution": "billing_explanation",
+      "notes": "Customer queried invoice line items."
+    }
+  ],
+  "expected_outcome": {
+    "expected_category": "account_security",
+    "expected_priority": "critical",
+    "expected_team": "trust_and_safety",
+    "expected_risk": "critical",
+    "expected_resolution_code": "fraud_review",
+    "verification_required": true,
+    "escalation_required": true,
+    "disallowed_resolutions": ["full_refund", "cancellation_processed", "account_unlocked"],
+    "required_action_sequence": [
+      "detect_risk",
+      "classify_ticket",
+      "set_priority",
+      "assign_team",
+      "request_verification",
+      "draft_reply",
+      "escalate",
+      "mark_resolved"
+    ]
+  },
+  "allowed_resolutions": ["fraud_review", "escalated_to_specialist", "verification_required"],
+  "disallowed_actions": ["full_refund_before_verification", "cancellation_before_verification", "account_unlock_before_security_review"],
+  "grading_weights": {
+    "risk_detection": 0.20,
+    "classification_correct": 0.10,
+    "priority_correct": 0.10,
+    "team_correct": 0.15,
+    "verification_requested": 0.15,
+    "escalation_correct": 0.10,
+    "reply_safety": 0.10,
+    "resolution_correct": 0.10
+  }
+}

@@ -1,0 +1,77 @@
+name: trustdeskenv
+version: "1.0.0"
+description: >
+  TrustDeskEnv is an OpenEnv-compatible enterprise customer support and
+  trust & safety operations simulation environment. AI agents must handle
+  realistic policy-aware support tickets through multi-step structured decisions.
+
+tags:
+  - openenv
+  - support-operations
+  - trust-and-safety
+  - enterprise
+  - policy-aware
+  - rl-environment
+
+interface:
+  reset:
+    endpoint: POST /reset
+    request_body:
+      task_id: string | null
+    returns: ObservationModel
+
+  step:
+    endpoint: POST /step
+    request_body: Action
+    returns: StepResponse
+
+  state:
+    endpoint: GET /state
+    returns: StateModel
+
+tasks:
+  - id: easy_billing_001
+    title: "Duplicate Charge Complaint"
+    difficulty: easy
+    step_budget: 10
+
+  - id: medium_refund_001
+    title: "Out-of-Window Refund Dispute"
+    difficulty: medium
+    step_budget: 12
+
+  - id: hard_security_001
+    title: "Security Breach + Billing + Cancellation Conflict"
+    difficulty: hard
+    step_budget: 15
+
+action_types:
+  - classify_ticket
+  - set_priority
+  - detect_risk
+  - assign_team
+  - request_verification
+  - offer_resolution
+  - escalate
+  - draft_reply
+  - mark_resolved
+
+reward:
+  type: dense
+  range: [-5.0, 5.0]
+  normalized_score: [0.0, 1.0]
+  includes_partial_credit: true
+  deterministic: true
+
+grading:
+  method: rule_based
+  score_range: [0.0, 1.0]
+  per_task_graders: true
+  breakdown_available: true
+
+deployment:
+  framework: fastapi
+  server: uvicorn
+  port: 7860
+  docker_compatible: true
+  huggingface_spaces_compatible: true

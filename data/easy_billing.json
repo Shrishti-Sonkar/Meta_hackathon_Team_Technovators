@@ -1,0 +1,44 @@
+{
+  "task_id": "easy_billing_001",
+  "title": "Duplicate Charge Complaint",
+  "difficulty": "easy",
+  "description": "A free-tier customer reports being charged twice for a monthly subscription. The correct behavior is to classify as billing, assign medium urgency, route to the billing team, and offer duplicate charge reversal after acknowledging the issue.",
+  "customer_message": "Hi, I was just charged twice for my subscription this month. I can see two charges of $9.99 on my bank statement from today. Please help!",
+  "customer_tier": "free",
+  "account_status": "active",
+  "policy_context": {
+    "duplicate_charge_policy": "Duplicate charges must be verified against billing records. If confirmed, reverse the duplicate charge within 5 business days.",
+    "refund_window_days": 14,
+    "contact_billing_team": true,
+    "auto_reverse_threshold_usd": 50
+  },
+  "security_flags": [],
+  "prior_history": [
+    {
+      "ticket_id": "prev_001",
+      "date": "2024-09-15",
+      "category": "billing",
+      "resolution": "billing_explanation",
+      "notes": "Customer asked about proration."
+    }
+  ],
+  "expected_outcome": {
+    "expected_category": "billing",
+    "expected_priority": "medium",
+    "expected_team": "billing",
+    "expected_risk": "none",
+    "expected_resolution_code": "duplicate_charge_reversed",
+    "verification_required": false,
+    "escalation_required": false
+  },
+  "allowed_resolutions": ["duplicate_charge_reversed", "credit_issued"],
+  "disallowed_actions": ["mark_resolved_before_reply", "escalate_without_reason"],
+  "grading_weights": {
+    "classification_correct": 0.20,
+    "priority_correct": 0.15,
+    "team_correct": 0.20,
+    "risk_correct": 0.10,
+    "resolution_correct": 0.20,
+    "reply_quality": 0.15
+  }
+}

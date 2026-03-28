@@ -1,0 +1,54 @@
+{
+  "task_id": "medium_refund_001",
+  "title": "Out-of-Window Refund Dispute",
+  "difficulty": "medium",
+  "description": "A premium-tier customer requests a full refund for an annual plan renewed 45 days ago. The standard refund window is 30 days. However, premium customers have a 7-day grace period, making days 31–37 eligible with manager approval. The customer is at day 45, outside even the grace period. Additionally, a prior goodwill refund was already used. The agent must interpret policy correctly, not promise a full refund, and offer a policy-compliant alternative (credit or partial refund via escalation).",
+  "customer_message": "I need a full refund for my annual subscription that renewed 45 days ago. I completely forgot about the renewal and I don't use the service. This is unfair. I expect a full refund immediately.",
+  "customer_tier": "premium",
+  "account_status": "active",
+  "policy_context": {
+    "refund_window_days": 30,
+    "grace_period_days": 7,
+    "days_since_renewal": 45,
+    "goodwill_refund_used": true,
+    "goodwill_refunds_allowed": 1,
+    "annual_plan": true,
+    "plan_value_usd": 299,
+    "partial_credit_allowed": true,
+    "pro_rata_credit_eligible": true,
+    "manager_approval_required_for_exception": true,
+    "policy_note": "Customer is outside refund window and grace period. Prior goodwill refund already used. Full refund must be declined. Pro-rata credit or escalation to manager for exception are the only allowed paths."
+  },
+  "security_flags": [],
+  "prior_history": [
+    {
+      "ticket_id": "prev_002",
+      "date": "2023-06-20",
+      "category": "refund",
+      "resolution": "goodwill_exception",
+      "notes": "Goodwill full refund granted for previous year renewal forgotten."
+    }
+  ],
+  "expected_outcome": {
+    "expected_category": "refund",
+    "expected_priority": "medium",
+    "expected_team": "refunds",
+    "expected_risk": "none",
+    "expected_resolution_code": "policy_declined",
+    "verification_required": false,
+    "escalation_required": false,
+    "acceptable_alternatives": ["credit_issued", "escalated_to_specialist"],
+    "disallowed_resolutions": ["full_refund", "goodwill_exception"]
+  },
+  "allowed_resolutions": ["credit_issued", "partial_refund", "policy_declined", "escalated_to_specialist"],
+  "disallowed_actions": ["full_refund", "duplicate_charge_reversed"],
+  "grading_weights": {
+    "classification_correct": 0.15,
+    "priority_correct": 0.10,
+    "team_correct": 0.15,
+    "risk_correct": 0.05,
+    "policy_interpretation_correct": 0.25,
+    "resolution_correct": 0.20,
+    "reply_quality": 0.10
+  }
+}
