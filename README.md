@@ -430,4 +430,6 @@ MIT License.
 
 ---
 
-*TrustDeskEnv — a benchmark where policy compliance, safety reasoning, and multi-step decision quality actually matter.*
+# TrustDeskEnv: A Policy-Aware AI Benchmark
+
+This environment tests agentic AI models on handling multi-step, policy-constrained enterprise tasks.
