@@ -13,8 +13,12 @@ dependencies = [
     "uvicorn",
     "pydantic",
     "openai",
-    "httpx"
+    "httpx",
+    "openenv-core<=0.2.0"
 ]
+
+[project.scripts]
+server = "server.app:app"
 
 [project.optional-dependencies]
 test = [

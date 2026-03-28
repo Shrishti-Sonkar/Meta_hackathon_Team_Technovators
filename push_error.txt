@@ -1,0 +1,7 @@
+remote: [31m-------------------------------------------------------------------------[0m        
+remote: [31mYou are not authorized to push to this repo.[0m        
+remote: [31mMake sure that you are properly logged in.[0m        
+remote: [31m-------------------------------------------------------------------------[0m        
+To https://huggingface.co/spaces/shrishtisonkar/Meta_Hackathon_Team_Technovators.git
+ ! [remote rejected] main -> main (pre-receive hook declined)
+error: failed to push some refs to 'https://huggingface.co/spaces/shrishtisonkar/Meta_Hackathon_Team_Technovators.git'
