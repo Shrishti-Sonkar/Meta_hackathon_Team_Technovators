@@ -1,6 +1,10 @@
 from app.main import app
-import os
 import uvicorn
+import os
+
+
+def create_app():
+    return app
 
 
 def main():
