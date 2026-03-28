@@ -162,7 +162,7 @@ async def root() -> Dict[str, Any]:
 
 
 @app.post("/reset", response_model=ObservationModel, summary="Reset environment")
-async def reset(request: ResetRequest) -> ObservationModel:
+async def reset(request: Optional[ResetRequest] = None) -> ObservationModel:
     """
     Initialize a new episode for the given `task_id` (or the default easy task).
 
@@ -172,6 +172,7 @@ async def reset(request: ResetRequest) -> ObservationModel:
     - available action types
     - step budget
     """
+    request = request or ResetRequest()
     env = get_env()
     try:
         obs = env.reset(task_id=request.task_id)
