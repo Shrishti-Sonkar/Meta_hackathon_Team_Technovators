@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "trustdeskenv"
+version = "1.0.0"
+description = "TrustDeskEnv: Policy-aware customer support and trust & safety operations AI Environment"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "pydantic",
+    "openai",
+    "httpx"
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest"
+]
