@@ -333,6 +333,7 @@ def run_task_episode(
 def run_baseline(
     model: str = "gpt-4o-mini",
     api_key: Optional[str] = None,
+    base_url: Optional[str] = None,
     verbose: bool = True,
 ) -> Dict[str, Any]:
     """
@@ -358,7 +359,7 @@ def run_baseline(
             )
         }
 
-    client = OpenAI(api_key=key)
+    client = OpenAI(api_key=key, base_url=base_url)
     env = TrustDeskEnv()
     task_ids = get_all_task_ids()  # fixed deterministic order
 
