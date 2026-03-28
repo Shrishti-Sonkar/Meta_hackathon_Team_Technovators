@@ -1,3 +1,12 @@
 from app.main import app
+import os
+import uvicorn
 
-# This file is required to satisfy the "missing server/app.py" check.
+
+def main():
+    port = int(os.getenv("PORT", "7860"))
+    uvicorn.run(app, host="0.0.0.0", port=port)
+
+
+if __name__ == "__main__":
+    main()
