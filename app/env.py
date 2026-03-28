@@ -145,17 +145,14 @@ class TrustDeskEnv:
         loop_detected = False
         if action_type == state.last_action_type:
             state.loop_count += 1
-            if state.loop_count > 1:
-                loop_penalty = -0.05
-                penalties["loop_penalty"] = loop_penalty
-                reward_value += loop_penalty
-                loop_detected = True
-                violations.append("repeated_action_loop")
-                decision_trace.append(
-                    f"Action '{action_type}' repeated consecutively — loop penalty applied."
-                )
-        else:
-            state.loop_count = 0
+            loop_penalty = -0.05
+            penalties["loop_penalty"] = loop_penalty
+            reward_value += loop_penalty
+            loop_detected = True
+            violations.append("repeated_action_loop")
+            decision_trace.append(
+                f"Action '{action_type}' repeated consecutively — loop penalty applied."
+            )
 
         state.last_action_type = action_type
 

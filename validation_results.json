@@ -31,7 +31,7 @@
     "adversarial/wrong_team_failure": "PASS",
     "adversarial/unsafe_reply_state": "PASS",
     "adversarial/unsafe_reply_violation": "PASS",
-    "adversarial/loop_detection": "FAIL \u2014 Looping not penalized",
+    "adversarial/loop_detection": "PASS",
     "adversarial/loop_negative_reward": "PASS",
     "baseline/parse_valid_json": "PASS",
     "baseline/parse_embedded_json": "PASS",
@@ -63,17 +63,15 @@
     "demo/good_action_positive_reward": "PASS",
     "demo/reward_delta_visible": "PASS"
   },
-  "issues": [
-    "[adversarial/loop_detection] Looping not penalized"
-  ],
+  "issues": [],
   "warnings": [
     "[invalid_action/missing_field] Action with None category processed (Pydantic allows Optional). Reward may be partial."
   ],
   "summary": {
     "total_checks": 62,
-    "passed": 61,
-    "failed": 1,
-    "pass_rate_pct": 98.4,
+    "passed": 62,
+    "failed": 0,
+    "pass_rate_pct": 100.0,
     "overall": "PASS",
     "readiness": "HIGH"
   }

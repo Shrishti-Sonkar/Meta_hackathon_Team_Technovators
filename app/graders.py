@@ -128,15 +128,17 @@ def grade_easy_billing(state: StateModel) -> GraderOutput:
         p = 0.03 * state.invalid_action_count
         penalty += p
         notes.append(f"Invalid actions taken: {state.invalid_action_count}")
-    if state.loop_count > 1:
-        p = 0.05 * (state.loop_count - 1)
+    if state.loop_count > 0:
+        p = 0.05 * state.loop_count
         penalty += p
         notes.append(f"Looping actions detected: {state.loop_count}")
-        failures.append(_make_failure(
-            "action_loop",
-            f"Agent repeated the same action {state.loop_count} time(s) — wasting budget.",
-            -p,
-        ))
+        failures.append(
+            FailureEntry(
+                failure_type="action_loop",
+                detail=f"Agent repeated the same action {state.loop_count} time(s) — wasting budget.",
+                penalty=-p,
+            )
+        )
 
     raw_score = sum(weights[k] * breakdown[k] for k in weights)
     final_score = clamp(raw_score - penalty)
