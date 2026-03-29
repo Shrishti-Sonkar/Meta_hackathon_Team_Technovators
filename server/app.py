@@ -3,10 +3,6 @@ import uvicorn
 import os
 
 
-def create_app():
-    return app
-
-
 def main():
     port = int(os.getenv("PORT", "7860"))
     uvicorn.run(app, host="0.0.0.0", port=port)
