@@ -38,16 +38,17 @@ Your job is to handle enterprise support tickets by taking structured, policy-aw
 
 You must always output a SINGLE valid JSON object representing your NEXT action. No other text, no markdown, no explanation.
 
-Available action_types:
-- classify_ticket       → required fields: category
-- set_priority          → required fields: priority
-- detect_risk           → required fields: risk_label
-- assign_team           → required fields: team
-- request_verification  → no extra fields required
-- offer_resolution      → required fields: resolution_code
-- escalate              → required fields: escalation_reason
-- draft_reply           → required fields: message (customer-facing, honest, policy-compliant)
-- mark_resolved         → required fields: resolution_code
+Available action_types and their EXACT required fields:
+
+- classify_ticket       → {"action_type": "classify_ticket", "category": "billing|refund|account_security|cancellation|technical|general|fraud"}
+- set_priority          → {"action_type": "set_priority", "priority": "low|medium|high|critical"}
+- detect_risk           → {"action_type": "detect_risk", "risk_label": "none|low|medium|high|critical"}
+- assign_team           → {"action_type": "assign_team", "team": "billing|refunds|account_security|trust_and_safety|customer_success|general_support|escalations"}
+- request_verification  → {"action_type": "request_verification"}
+- offer_resolution      → {"action_type": "offer_resolution", "resolution_code": "full_refund|partial_refund|credit_issued|no_refund_policy|duplicate_charge_reversed|fraud_review|policy_declined|goodwill_exception|escalated_to_specialist|verification_required|cancellation_processed|account_unlocked|account_suspended"}
+- escalate              → {"action_type": "escalate", "escalation_reason": "string explanation"}
+- draft_reply           → {"action_type": "draft_reply", "message": "customer-facing message"}
+- mark_resolved         → {"action_type": "mark_resolved", "resolution_code": "full_refund|partial_refund|credit_issued|no_refund_policy|duplicate_charge_reversed|fraud_review|policy_declined|goodwill_exception|escalated_to_specialist|verification_required|cancellation_processed|account_unlocked|account_suspended"}
 
 STRICT RULES:
 1. ALWAYS classify the ticket as your FIRST action.
@@ -55,13 +56,16 @@ STRICT RULES:
 3. NEVER promise a refund, cancellation, or account restoration before verification if security flags are active.
 4. In security scenarios (security_flags non-empty), ALWAYS request_verification before mark_resolved.
 5. Draft a helpful, safe, honest reply before resolving.
-6. Output ONLY valid JSON — nothing else.
+6. Use ONLY the exact enum values listed above - no variations or custom values.
+7. Output ONLY valid JSON — nothing else.
 
 GOOD EXAMPLE:
 {"action_type": "classify_ticket", "category": "billing"}
 
-BAD (never do this):
-Here is my action: {"action_type": ...}  ← bad, must be JSON only
+BAD EXAMPLES (never do this):
+- {"action": "classify_ticket", "category": "billing"}  ← wrong field name
+- {"action_type": "classify_ticket", "category": "duplicate_charge"}  ← invalid enum value
+- Here is my action: {"action_type": "classify_ticket", "category": "billing"}  ← extra text
 """
 
 CORRECTION_PROMPT = """Your previous output was not valid JSON. 
@@ -84,6 +88,24 @@ def _smart_fallback(obs_dict: Dict[str, Any]) -> Dict[str, Any]:
     """
     available = obs_dict.get("available_actions", [])
     security_flags = obs_dict.get("security_flags", [])
+    steps_taken = obs_dict.get("steps_taken", 0)
+    remaining_steps = obs_dict.get("remaining_steps", 10)
+
+    # If we're in the final few steps and haven't resolved yet, prioritize resolution
+    if remaining_steps <= 3 and "mark_resolved" in available:
+        # Choose appropriate resolution based on context
+        if security_flags:
+            resolution_code = "fraud_review"
+        elif "refund" in obs_dict.get("customer_message", "").lower():
+            resolution_code = "policy_declined"  # Safe default for refund cases
+        else:
+            resolution_code = "escalated_to_specialist"  # Safe general resolution
+        return {"action_type": "mark_resolved", "resolution_code": resolution_code}
+
+    # If we have few steps left and no reply drafted, draft one
+    if remaining_steps <= 2 and "draft_reply" in available and not any(h.get("action", {}).get("action_type") == "draft_reply" for h in obs_dict.get("prior_history", [])):
+        message = "Thank you for contacting support. We have reviewed your request and will process it according to our policy. Please allow 3-5 business days for resolution."
+        return {"action_type": "draft_reply", "message": message}
 
     priority_sequence = [
         "classify_ticket",
@@ -156,6 +178,8 @@ def _smart_fallback(obs_dict: Dict[str, Any]) -> Dict[str, Any]:
 
 def _build_user_prompt(observation: Dict[str, Any]) -> str:
     """Construct the per-step model prompt from the current observation."""
+    correction_note = observation.get("_correction_note", "")
+    
     return (
         f"=== Current Ticket State ===\n"
         f"Task ID:          {observation.get('task_id')}\n"
@@ -170,6 +194,7 @@ def _build_user_prompt(observation: Dict[str, Any]) -> str:
         f"(remaining: {observation.get('remaining_steps')})\n"
         f"Current Status:   {observation.get('current_status')}\n"
         f"Available Actions: {observation.get('available_actions')}\n\n"
+        f"{correction_note}\n\n"
         f"Output your next action as a single JSON object:"
     )
 
@@ -207,8 +232,10 @@ def run_task_episode(
     total_reward = 0.0
     invalid_actions = 0
     violations = 0
+    consecutive_invalid = 0
+    max_consecutive_invalid = 3  # Allow up to 3 consecutive invalid actions before stopping
 
-    while not done and step_count < max_steps:
+    while not done and step_count < max_steps and consecutive_invalid < max_consecutive_invalid:
         user_prompt = _build_user_prompt(obs_dict)
         messages.append({"role": "user", "content": user_prompt})
 
@@ -279,6 +306,13 @@ def run_task_episode(
         done = step_response.done
         step_info = step_response.info
 
+        # If action was invalid, add correction context to next prompt
+        if step_info.get("invalid_action"):
+            error_msg = step_info.get("error_message", "Invalid action attempted")
+            correction_note = f"\n\nIMPORTANT: Your previous action was invalid: {error_msg}. Please choose a different valid action from the available actions list."
+            # Add this to the next user prompt
+            obs_dict["_correction_note"] = correction_note
+
         total_reward += reward
         step_count += 1
 
@@ -287,6 +321,9 @@ def run_task_episode(
         violations += len(step_violations)
         if step_info.get("invalid_action"):
             invalid_actions += 1
+            consecutive_invalid += 1
+        else:
+            consecutive_invalid = 0  # Reset counter on valid action
 
         history.append({
             "step": step_count,
@@ -358,6 +395,14 @@ def run_baseline(
                 "Set it in your environment or pass api_key argument."
             )
         }
+
+    # Detect key type and set appropriate base URL
+    if key.startswith("sk-or-v1-"):
+        # OpenRouter key
+        base_url = base_url or "https://openrouter.ai/api/v1"
+    else:
+        # OpenAI key
+        base_url = base_url or "https://api.openai.com/v1"
 
     client = OpenAI(api_key=key, base_url=base_url)
     env = TrustDeskEnv()
